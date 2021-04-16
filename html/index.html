@@ -1,0 +1,184 @@
+<!DOCTYPE html >
+<html ng-app="clientes">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Clientes</title>
+  </head>
+  <body ng-Controller="clientesCtrl">
+    <div class="container">
+      <h3 class="display-4">Formulario de Cliente</h3>
+      <div id="ProjetoCliente">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h5 class="panel-title"><i class="fa fa-plus-circle fa-1x" ng-show="!check"> Novo Usuário</i><i class="fa fa-plus-circle fa-1x" ng-show="check"> Editar Usuário</i></h5>
+          </div>
+          <div class="panel-body">
+            <form name="ClienteForm">
+              <div class="row mb">
+                <div class="col-md-4">
+                  <p>Nome <font color="red">*</font></p>
+                  <input class="form-control" type="text" ng-model="cliente.nome" name="nome" placeholder="João" ng-required="true"/>
+                </div>
+                <div class="col-md-4">
+                  <p>Sobrenome </p>
+                  <input class="form-control" type="text" ng-model="cliente.sobrenome" name="sobrenome" placeholder="Silva"/>
+                </div>
+                <div class="col-md-4">
+                  <p>Email  <font color="red">*</font></p>
+                  <input class="form-control" type="text" ng-model="cliente.email" name="email" placeholder="exemplo@exemplo.com" ng-required="true" ng-pattern="/^[a-z]+[a-z0-9._]+@[a-z]+.[a-z.]{3,5}$/"/>
+                </div>
+              </div>
+              <div class="row mb">
+                <div class="col-md-2">
+                  <p>Telefone </p>
+                  <input class="form-control" type="text" ng-model="cliente.telefone" name="telefone" placeholder="(99) 9999-9999 " data-mask="(00) 0000-0000"/>
+                </div>
+                <div class="col-md-2">
+                  <p>Data de Nascimento </p>
+                  <input class="form-control" type="text" ng-model="cliente.dataDeNascimento" name="dataDeNascimento" placeholder="DD/MM/YY" data-mask="00/00/0000"/>
+                </div>
+                <div class="col-md-2">
+                  <p>Estado <font color="red">*</font></p>
+                  <select class="form-control" ng-options="estado.nome as estado.nome for estado in estados" ng-model="cliente.estado" name="estado" ng-required="true">
+                    <option value="">Estado</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <p>Cidade <font color="red">*</font></p>
+                  <select class="form-control" ng-options="cidade.nome as cidade.nome for cidade in cidades" ng-model="cliente.cidade" name="cidade" ng-disabled="!cliente.estado" ng-required="true">
+                    <option value="">Cidade</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <p>Sexo <font color="red">*</font></p>
+                  <input type="radio" ng-model="cliente.sexo" name="sexo" value="Feminino"/><b> Feminino</b>
+                  <input type="radio" ng-model="cliente.sexo" name="sexo" value="Masculino"/><b> Masculino</b>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2">
+                  <p>Obrigatório <font color="red">*</font></p>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!--Rodapé que mostra os erros e os buttons de limpar e salvar-->
+          <div class="panel-footer">
+            <div class="alert alert-danger" ng-show="ClienteForm.nome.$error.required &amp;&amp; ClienteForm.nome.$dirty">
+              <p>Preencha o nome.</p>
+            </div>
+            <div class="alert alert-danger" ng-show="ClienteForm.email.$error.required &amp;&amp; ClienteForm.email.$dirty">
+              <p>Preencha o email.</p>
+            </div>
+            <div class="alert alert-danger" ng-show="ClienteForm.email.$error.pattern">
+              <p>O formato do email deve ser exemplo@exemplo.com</p>
+            </div>
+            <!--Checkemail tem a funcionalidade de passar se o email já tem cadastrado no banco.-->
+            <div class="alert alert-danger" ng-show="checkEmail &amp;&amp; ClienteForm.email.$pristine">
+              <p>Email já em uso.</p>
+            </div>
+            <div class="alert alert-danger" ng-show="ClienteForm.estado.$error.required &amp;&amp; ClienteForm.estado.$dirty">
+              <p>Escolha o estado.</p>
+            </div>
+            <div class="alert alert-danger" ng-show="ClienteForm.cidade.$error.required &amp;&amp; ClienteForm.cidade.$dirty">
+              <p>Escolha a cidade.</p>
+            </div>
+            <div class="alert alert-danger" ng-show="ClienteForm.sexo.$error.required">
+              <p>Escolha o sexo.</p>
+            </div>
+            <div class="input-group col-md-12 text-right">
+              <!--Check é necessario para mudar as configurações dos botões a partir do momento que o usuário clica em editar-->
+              <div ng-show="!check">
+                <button class="btn btn-md btn-default border" ng-click="limparCliente()"><i class="fa fa-times-circle" aria-hidden="true" ng-disabled="check"></i>
+                  <and>Limpar</and>
+                </button>
+                <button class="btn btn-md btn-success border" ng-click="adicionarCliente(cliente)" ng-disabled="ClienteForm.$invalid"><i class="fa fa-floppy-o" aria-hidden="true"></i>
+                  <and>Salvar </and>
+                </button>
+              </div>
+              <div ng-show="check">
+                <button class="btn btn-md btn-default border" ng-click="limparCliente()"><i class="fa fa-times-circle" aria-hidden="true" ng-disabled="check"></i>
+                  <and>Cancelar</and>
+                </button>
+                <button class="btn btn-md btn-success border" ng-click="atualizarCliente(cliente)" ng-disabled="ClienteForm.$invalid"><i class="fa fa-floppy-o" aria-hidden="true"></i>
+                  <and>Salvar                     </and>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--Painel Secundario-->
+        <div class="panel panel-secondary">  
+          <div class="panel-body">
+            <!--Barra de pesquisa-->
+            <div class="input-group mb">
+              <div class="input-group-addon"><span class="input-group-text"></span><i class="fa fa-search" aria-hidden="true"> </i></div>
+              <input class="form-control" type="text" ng-model="criterioDeBusca"/>
+            </div>
+            <!--Tabela que mostra os clientes-->
+            <table class="table table-bordered   table-responsive">    
+              <thead>
+                <tr ng-repeat="cliente in clientes " ng-show="$index &lt; 1">
+                  <th><a href="" ng-click="ordenarPor('nome')">Nome</a></th>
+                  <th><a href="" ng-click="ordenarPor('sobrenome')">Sobrenome</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('email')">Email</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('telefone')">Telefone</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('dataDeNascimento')">Data de Nascimento</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('estado')">Estado</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('cidade')">Cidade</a></th>
+                  <th>   <a href="" ng-click="ordenarPor('sexo')">Sexo</a></th>
+                  <th>   <a href="">Opções</a></th>
+                </tr>
+              </thead>
+              <tr ng-repeat="cliente in clientes| filter:criterioDeBusca | orderBy:criterioDeOrdenacao:direcaoDaOrdenacao">
+                <td>{{cliente.nome}}</td>
+                <td>{{cliente.sobrenome}}</td>
+                <td>{{cliente.email}}</td>
+                <td>{{cliente.telefone}}</td>
+                <td>{{cliente.dataDeNascimento}}</td>
+                <td>{{cliente.estado}}</td>
+                <td>{{cliente.cidade}}</td>
+                <td>{{cliente.sexo}}</td>
+                <!--Carregando o idcliente para caso a pessoa deseje editar-->
+                <td hidden="hidden">{{cliente.idCliente}}</td>
+                <td>
+                  <!--Buttons de editar/excluir-->
+                  <button class="btn btn-warning btn-sm" ng-click="editarCliente(cliente)"><i class="fa fa-pencil-square-o fa-lg" aria-hidden="true"></i></button>
+                  <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" ng-click="salvarCliente(cliente)"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i></button>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Modal para confirmação de exclusão do cliente-->
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalLable">Excluir</h5>
+              <!--Hidden com o email e o id do cliente-->
+              <hidden ng-model="cliente.idClienteDelete"></hidden>
+              <hidden ng-model="cliente.emailClienteDelete"></hidden>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"> </span></button>
+            </div>
+            <div class="modal-body">Tem certeza que deseja excluir o cliente com email: {{cliente.emailClienteDelete}}</div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Fechar</button>
+              <button class="btn btn-danger" type="button" ng-click="deletarCliente(cliente)" data-dismiss="modal">Sim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="../lib/angular/angular.js"></script>
+  <script src="../js/jquery.js"></script>
+  <script src="../js/jquery.mask.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/controllers/clienteCtrl.js"></script>
+  <script src="../lib/bootstrap-3.2/dist/js/bootstrap.js"></script>
+  <link rel="stylesheet" type="text/css" href="../lib/bootstrap-3.2/dist/css/bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+  <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css"/>
+</html>
